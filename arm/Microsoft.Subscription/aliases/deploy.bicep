@@ -60,7 +60,7 @@ module RBACDeployment './.bicep/nested_tenant_rbac.bicep' = [for (roleAssignment
     }
 }]
 
-// ???????
 output subscriptionId string = subscription.id
+// ???????
 output tags object = tags
 output roleAssignments array = roleAssignments
