@@ -495,20 +495,7 @@
                                                         "condition": "[and(not(empty(parameters('roleAssignment'))), contains(parameters('roleAssignment'), 'roleDefinitionIdOrName'), contains(parameters('roleAssignment'), 'principalIds'), not(empty(parameters('roleAssignment').roleDefinitionIdOrName)), not(empty(parameters('roleAssignment').principalIds)) )]"
                                                     },
                                                     "resources": [
-                                                        {
-                                                            "type": "Microsoft.Authorization/roleAssignments",
-                                                            "apiVersion": "2018-09-01-preview",
-                                                            "name": "[if( variables('condition'), guid( parameters('subscriptionId'), array(parameters('roleAssignment').principalIds)[copyIndex('innerRbacCopy')], parameters('roleAssignment').roleDefinitionIdOrName ), guid('dummy'))]",
-                                                            "condition": "[variables('condition')]",
-                                                            "copy": {
-                                                                "name": "innerRbacCopy",
-                                                                "count": "[length(array(parameters('roleAssignment').principalIds))]"
-                                                            },
-                                                            "properties": {
-                                                                "roleDefinitionId": "[if(contains(parameters('builtInRoleNames'), parameters('roleAssignment').roleDefinitionIdOrName ), parameters('builtInRoleNames')[parameters('roleAssignment').roleDefinitionIdOrName] , parameters('roleAssignment').roleDefinitionIdOrName )]",
-                                                                "principalId": "[array(parameters('roleAssignment').principalIds)[copyIndex('innerRbacCopy')]]"
-                                                            }
-                                                        }
+                                                 
                                                     ]
                                                 }
                                             }
