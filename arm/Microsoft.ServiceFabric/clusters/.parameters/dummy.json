@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serviceFabricClusterName": {
+            "value": "sxx-az-sfc-weu-x-001"
+        },
+        "name": {
+            "value": "WordCount"
+        },
+        "versions": {
+            "value": [
+                {
+                    "name": "1.0.0",
+                    // "appPackageUrl": "https://github.com/Azure-Samples/service-fabric-wordcount/blob/master/WordCountV2.sfpkg"
+                    "appPackageUrl": "https://adpsxxazsaweux001.blob.core.windows.net/uploads/WordCountV2.sfpkg"
+                }
+            ]
+        }
+    }
+}
