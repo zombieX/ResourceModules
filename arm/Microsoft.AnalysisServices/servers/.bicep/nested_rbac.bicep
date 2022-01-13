@@ -30,3 +30,12 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   }
   scope: server
 }]
+
+output server object = server
+
+// {
+//     'resourceGroup': resourceGroup()
+//     'subscription' : subscription()
+//     //'managementGroup' : managementGroup() // Depending on the scope
+//     //'tenant' : tenant()
+// }
