@@ -5,9 +5,9 @@
     "roleDefinitionIdOrName": {
       "value": "Contributor"
     },
-    "principalId": {
-      "value": "<<msiPrincipalID>>" // The object ID of the deployed MSI
-    },
+    // "principalId": {
+    //   "value": "<<msiPrincipalID>>" // The object ID of the deployed MSI
+    // },
     "subscriptionId": {
       "value": "<<subscriptionId>>"
     }

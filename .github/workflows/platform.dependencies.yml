@@ -860,7 +860,7 @@ jobs:
         run: |
           # Initialize additional parameters hashtable
           $additionalParametersHash=@{}
-          $additionalParametersHash.add('msiPrincipalId','${{ needs.job_deploy_msi.outputs.msiPrincipalId }}')
+          $additionalParametersHash.add('principalId','${{ needs.job_deploy_msi.outputs.msiPrincipalId }}')
 
           # Convert to json to print as variable
           $additionalParameters = $additionalParametersHash | ConvertTo-Json -Compress -Depth 100
