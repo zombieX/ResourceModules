@@ -8,6 +8,9 @@ inputs:
   parameterFilePath:
     description: 'The path to the parameter file to use for deployment'
     required: true
+  additionalParameters:
+    description: 'The list of additional deployment parameters in json format'
+    required: false
   location:
     description: 'The location to use for deployment'
     required: true
@@ -142,6 +145,13 @@ runs:
           managementGroupId  = '${{ inputs.managementGroupId }}'
           doNotThrow         = $true
         }
+
+        $additionalParametersInput  = '${{ inputs.additionalParameters }}'
+        Write-Verbose "additionalParameters Input $additionalParametersInput" -Verbose
+
+        # $functionInput += @{
+        #   additionalParameters = $additionalParameters
+        # }
 
         Write-Verbose "Invoke task with" -Verbose
         Write-Verbose ($functionInput | ConvertTo-Json | Out-String) -Verbose
