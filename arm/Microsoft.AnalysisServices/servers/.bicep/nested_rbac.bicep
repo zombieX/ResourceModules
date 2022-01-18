@@ -33,9 +33,8 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
 
 output server object = server
 
-// {
-//     'resourceGroup': resourceGroup()
-//     'subscription' : subscription()
-//     //'managementGroup' : managementGroup() // Depending on the scope
-//     //'tenant' : tenant()
-// }
+output roleAssignment array = [for (principalId, i) in principalIds: {
+  name: name
+  properties: roleAssignment[i].properties
+  scope: roleAssignment[i].scope
+}]
