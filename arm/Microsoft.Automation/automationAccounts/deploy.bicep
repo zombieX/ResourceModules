@@ -208,6 +208,11 @@ module automationAccount_variables 'variables/deploy.bicep' = [for (variable, in
   }
 }]
 
+// output outvar array = [for x in automationAccount_variables: x]
+output outvar array = [for (variable, index) in variables: {
+  variables: automationAccount_variables[index]
+}]
+
 module automationAccount_linkedService '.bicep/nested_linkedService.bicep' = if (!empty(linkedWorkspaceId)) {
   name: '${uniqueString(deployment().name, location)}-AutoAccount-LinkedService'
   params: {
@@ -342,3 +347,5 @@ output automationAccountResourceGroup string = resourceGroup().name
 
 @description('The principal ID of the system assigned identity.')
 output systemAssignedPrincipalId string = systemAssignedIdentity && contains(automationAccount.identity, 'principalId') ? automationAccount.identity.principalId : ''
+
+// output myarray array = automationAccount_variables

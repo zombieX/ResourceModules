@@ -43,3 +43,6 @@ output variableResourceId string = variable.id
 
 @sys.description('The resource group of the deployed variable')
 output variableResourceGroup string = resourceGroup().name
+
+
+output variable object = variable
