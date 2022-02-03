@@ -106,6 +106,8 @@ function Invoke-ResourceRemoval {
             $resourceName = $ResourceId.Split('/')[-1]
 
             # Delete service
+            # Portal: https://management.azure.com/subscriptions/a7439831-1cd9-435d-a091-4aa863c96556/resourceGroups/validation-rg/providers/Microsoft.Network/azureFirewalls/sxx-az-azfw-x-001?api-version=2020-05-01
+
             $deletePath = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/azureFirewalls/{2}?api-version=2020-05-01' -f $subscriptionId, $resourceGroupName, $resourceName
             $deleteRequestInputObject = @{
                 Method = 'DELETE'
