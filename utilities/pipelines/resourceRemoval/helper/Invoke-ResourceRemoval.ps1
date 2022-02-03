@@ -100,6 +100,22 @@ function Invoke-ResourceRemoval {
             $null = Remove-AzResource -ResourceId $resourceId -Force -ErrorAction 'Stop'
             break
         }
+        'Microsoft.Network/azureFirewalls' {
+            $subscriptionId = $ResourceId.Split('/')[2]
+            $resourceGroupName = $ResourceId.Split('/')[4]
+            $resourceName = $ResourceId.Split('/')[-1]
+
+            # Delete service
+            $deletePath = 'https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/azureFirewalls/{2}?api-version=2021-03-01' -f $subscriptionId, $resourceGroupName, $resourceName
+            $deleteRequestInputObject = @{
+                Method = 'DELETE'
+                Path   = $deletePath
+            }
+            if ($PSCmdlet.ShouldProcess(('Firewall with ID [{0}]' -f $ResourceId), 'Delete')) {
+                $null = Invoke-AzRestMethod @deleteRequestInputObject
+            }
+            break
+        }
         ### CODE LOCATION: Add custom removal action here
         Default {
             $null = Remove-AzResource -ResourceId $resourceId -Force -ErrorAction 'Stop'
