@@ -106,13 +106,13 @@ function Invoke-ResourceRemoval {
             $resourceName = $ResourceId.Split('/')[-1]
 
             # Delete service
-            $deletePath = 'https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/azureFirewalls/{2}?api-version=2021-03-01' -f $subscriptionId, $resourceGroupName, $resourceName
+            $deletePath = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/azureFirewalls/{2}?api-version=2020-05-01' -f $subscriptionId, $resourceGroupName, $resourceName
             $deleteRequestInputObject = @{
                 Method = 'DELETE'
                 Path   = $deletePath
             }
             if ($PSCmdlet.ShouldProcess(('Firewall with ID [{0}]' -f $ResourceId), 'Delete')) {
-                $null = Invoke-AzRestMethod @deleteRequestInputObject
+                Invoke-AzRestMethod @deleteRequestInputObject
             }
             break
         }
