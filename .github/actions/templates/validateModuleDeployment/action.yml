@@ -125,7 +125,7 @@ runs:
         }
 
         # Invoke Token Replacement Functionality
-        $null = Convert-TokensInFile @ConvertTokensInputs
+        $null = Convert-TokensInFile @ConvertTokensInputs -Verbose
 
         Write-Output "::endgroup::"
 

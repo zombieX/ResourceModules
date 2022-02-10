@@ -65,6 +65,7 @@ function Convert-TokensInFile {
         $FilteredTokens = ($Tokens | Sort-Object -Unique).Clone()
         @($FilteredTokens.Keys) | ForEach-Object {
             if ([String]::IsNullOrEmpty($FilteredTokens[$_])) {
+                Write-Verbose "Filter out token [$_] as its value is empty"
                 $FilteredTokens.Remove($_)
             }
         }
