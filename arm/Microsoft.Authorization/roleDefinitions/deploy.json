@@ -1,0 +1,529 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "roleName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the custom RBAC role to be created."
+      }
+    },
+    "description": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Description of the custom RBAC role to be created."
+      }
+    },
+    "actions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional. List of allowed actions."
+      }
+    },
+    "notActions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional. List of denied actions."
+      }
+    },
+    "dataActions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional. List of allowed data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+      }
+    },
+    "notDataActions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional. List of denied data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+      }
+    },
+    "managementGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. The group ID of the Management Group where the Role Definition and Target Scope will be applied to. Cannot use when Subscription or Resource Groups Parameters are used."
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. The subscription ID where the Role Definition and Target Scope will be applied to. Use for both Subscription level and Resource Group Level."
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. The name of the Resource Group where the Role Definition and Target Scope will be applied to."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "assignableScopes": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional. Role definition assignable scopes. If not provided, will use the current scope provided."
+      }
+    }
+  },
+  "resources": [
+    {
+      "condition": "[and(and(not(empty(parameters('managementGroupId'))), empty(parameters('subscriptionId'))), empty(parameters('resourceGroupName')))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('{0}-RoleDefinition-MG-Module', uniqueString(deployment().name, parameters('location')))]",
+      "scope": "[format('Microsoft.Management/managementGroups/{0}', parameters('managementGroupId'))]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "roleName": {
+            "value": "[parameters('roleName')]"
+          },
+          "description": {
+            "value": "[if(not(empty(parameters('description'))), parameters('description'), '')]"
+          },
+          "actions": {
+            "value": "[if(not(empty(parameters('actions'))), parameters('actions'), createArray())]"
+          },
+          "notActions": {
+            "value": "[if(not(empty(parameters('notActions'))), parameters('notActions'), createArray())]"
+          },
+          "assignableScopes": {
+            "value": "[if(not(empty(parameters('assignableScopes'))), parameters('assignableScopes'), createArray())]"
+          },
+          "managementGroupId": {
+            "value": "[parameters('managementGroupId')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "roleName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the custom RBAC role to be created."
+              }
+            },
+            "description": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Description of the custom RBAC role to be created."
+              }
+            },
+            "actions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of allowed actions."
+              }
+            },
+            "notActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of denied actions."
+              }
+            },
+            "managementGroupId": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. The group ID of the Management Group where the Role Definition and Target Scope will be applied to."
+              }
+            },
+            "assignableScopes": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. Role definition assignable scopes. If not provided, will use the current scope provided."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleDefinitions",
+              "apiVersion": "2018-01-01-preview",
+              "name": "[guid(parameters('roleName'), parameters('managementGroupId'))]",
+              "properties": {
+                "roleName": "[parameters('roleName')]",
+                "description": "[parameters('description')]",
+                "type": "customRole",
+                "permissions": [
+                  {
+                    "actions": "[parameters('actions')]",
+                    "notActions": "[parameters('notActions')]"
+                  }
+                ],
+                "assignableScopes": "[if(equals(parameters('assignableScopes'), createArray()), array(tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId'))), parameters('assignableScopes'))]"
+              }
+            }
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "value": "[guid(parameters('roleName'), parameters('managementGroupId'))]",
+              "metadata": {
+                "description": "The GUID of the Role Definition"
+              }
+            },
+            "scope": {
+              "type": "string",
+              "value": "[tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId'))]",
+              "metadata": {
+                "description": "The scope this Role Definition applies to"
+              }
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId')), 'Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('managementGroupId')))]",
+              "metadata": {
+                "description": "The resource ID of the Role Definition"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "condition": "[and(and(empty(parameters('managementGroupId')), not(empty(parameters('subscriptionId')))), empty(parameters('resourceGroupName')))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('{0}-RoleDefinition-Sub-Module', uniqueString(deployment().name, parameters('location')))]",
+      "subscriptionId": "[parameters('subscriptionId')]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "roleName": {
+            "value": "[parameters('roleName')]"
+          },
+          "description": {
+            "value": "[if(not(empty(parameters('description'))), parameters('description'), '')]"
+          },
+          "actions": {
+            "value": "[if(not(empty(parameters('actions'))), parameters('actions'), createArray())]"
+          },
+          "notActions": {
+            "value": "[if(not(empty(parameters('notActions'))), parameters('notActions'), createArray())]"
+          },
+          "dataActions": {
+            "value": "[if(not(empty(parameters('dataActions'))), parameters('dataActions'), createArray())]"
+          },
+          "notDataActions": {
+            "value": "[if(not(empty(parameters('notDataActions'))), parameters('notDataActions'), createArray())]"
+          },
+          "assignableScopes": {
+            "value": "[if(not(empty(parameters('assignableScopes'))), parameters('assignableScopes'), createArray())]"
+          },
+          "subscriptionId": {
+            "value": "[parameters('subscriptionId')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "roleName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the custom RBAC role to be created."
+              }
+            },
+            "description": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Description of the custom RBAC role to be created."
+              }
+            },
+            "actions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of allowed actions."
+              }
+            },
+            "notActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of denied actions."
+              }
+            },
+            "dataActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of allowed data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+              }
+            },
+            "notDataActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of denied data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+              }
+            },
+            "subscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Optional. The subscription ID where the Role Definition and Target Scope will be applied to."
+              }
+            },
+            "assignableScopes": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. Role definition assignable scopes. If not provided, will use the current scope provided."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleDefinitions",
+              "apiVersion": "2018-01-01-preview",
+              "name": "[guid(parameters('roleName'), parameters('subscriptionId'))]",
+              "properties": {
+                "roleName": "[parameters('roleName')]",
+                "description": "[parameters('description')]",
+                "type": "customRole",
+                "permissions": [
+                  {
+                    "actions": "[parameters('actions')]",
+                    "notActions": "[parameters('notActions')]",
+                    "dataActions": "[parameters('dataActions')]",
+                    "notDataActions": "[parameters('notDataActions')]"
+                  }
+                ],
+                "assignableScopes": "[if(not(empty(parameters('assignableScopes'))), parameters('assignableScopes'), array(subscription().id))]"
+              }
+            }
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "value": "[guid(parameters('roleName'), parameters('subscriptionId'))]",
+              "metadata": {
+                "description": "The GUID of the Role Definition"
+              }
+            },
+            "scope": {
+              "type": "string",
+              "value": "[subscription().id]",
+              "metadata": {
+                "description": "The scope this Role Definition applies to"
+              }
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[subscriptionResourceId(parameters('subscriptionId'), 'Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('subscriptionId')))]",
+              "metadata": {
+                "description": "The resource ID of the Role Definition"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "condition": "[and(and(empty(parameters('managementGroupId')), not(empty(parameters('resourceGroupName')))), not(empty(parameters('subscriptionId'))))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('{0}-RoleDefinition-RG-Module', uniqueString(deployment().name, parameters('location')))]",
+      "subscriptionId": "[parameters('subscriptionId')]",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "roleName": {
+            "value": "[parameters('roleName')]"
+          },
+          "description": {
+            "value": "[if(not(empty(parameters('description'))), parameters('description'), '')]"
+          },
+          "actions": {
+            "value": "[if(not(empty(parameters('actions'))), parameters('actions'), createArray())]"
+          },
+          "notActions": {
+            "value": "[if(not(empty(parameters('notActions'))), parameters('notActions'), createArray())]"
+          },
+          "dataActions": {
+            "value": "[if(not(empty(parameters('dataActions'))), parameters('dataActions'), createArray())]"
+          },
+          "notDataActions": {
+            "value": "[if(not(empty(parameters('notDataActions'))), parameters('notDataActions'), createArray())]"
+          },
+          "assignableScopes": {
+            "value": "[if(not(empty(parameters('assignableScopes'))), parameters('assignableScopes'), createArray())]"
+          },
+          "subscriptionId": {
+            "value": "[parameters('subscriptionId')]"
+          },
+          "resourceGroupName": {
+            "value": "[parameters('resourceGroupName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "roleName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the custom RBAC role to be created."
+              }
+            },
+            "description": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Description of the custom RBAC role to be created."
+              }
+            },
+            "actions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of allowed actions."
+              }
+            },
+            "notActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of denied actions."
+              }
+            },
+            "dataActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of allowed data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+              }
+            },
+            "notDataActions": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. List of denied data actions. This is not supported if the assignableScopes contains Management Group Scopes"
+              }
+            },
+            "subscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Optional. The subscription ID where the Role Definition and Target Scope will be applied to."
+              }
+            },
+            "resourceGroupName": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().name]",
+              "metadata": {
+                "description": "Optional. The name of the Resource Group where the Role Definition and Target Scope will be applied to."
+              }
+            },
+            "assignableScopes": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Optional. Role definition assignable scopes. If not provided, will use the current scope provided."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleDefinitions",
+              "apiVersion": "2018-01-01-preview",
+              "name": "[guid(parameters('roleName'), parameters('subscriptionId'), parameters('resourceGroupName'))]",
+              "properties": {
+                "roleName": "[parameters('roleName')]",
+                "description": "[parameters('description')]",
+                "type": "customRole",
+                "permissions": [
+                  {
+                    "actions": "[parameters('actions')]",
+                    "notActions": "[parameters('notActions')]",
+                    "dataActions": "[parameters('dataActions')]",
+                    "notDataActions": "[parameters('notDataActions')]"
+                  }
+                ],
+                "assignableScopes": "[if(equals(parameters('assignableScopes'), createArray()), array(resourceGroup().id), parameters('assignableScopes'))]"
+              }
+            }
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "value": "[guid(parameters('roleName'), parameters('subscriptionId'), parameters('resourceGroupName'))]",
+              "metadata": {
+                "description": "The GUID of the Role Definition"
+              }
+            },
+            "scope": {
+              "type": "string",
+              "value": "[resourceGroup().id]",
+              "metadata": {
+                "description": "The scope this Role Definition applies to"
+              }
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('subscriptionId'), parameters('resourceGroupName')))]",
+              "metadata": {
+                "description": "The resource ID of the Role Definition"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "name": {
+      "type": "string",
+      "value": "[if(not(empty(parameters('managementGroupId'))), reference(extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-MG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.name.value, if(not(empty(parameters('resourceGroupName'))), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('subscriptionId'), parameters('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-RG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.name.value, reference(subscriptionResourceId(parameters('subscriptionId'), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-Sub-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.name.value))]",
+      "metadata": {
+        "description": "The GUID of the Role Definition"
+      }
+    },
+    "resourceId": {
+      "type": "string",
+      "value": "[if(not(empty(parameters('managementGroupId'))), reference(extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-MG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.resourceId.value, if(not(empty(parameters('resourceGroupName'))), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('subscriptionId'), parameters('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-RG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.resourceId.value, reference(subscriptionResourceId(parameters('subscriptionId'), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-Sub-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.resourceId.value))]",
+      "metadata": {
+        "description": "The resource ID of the Role Definition"
+      }
+    },
+    "roleDefinitionScope": {
+      "type": "string",
+      "value": "[if(not(empty(parameters('managementGroupId'))), reference(extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-MG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.scope.value, if(not(empty(parameters('resourceGroupName'))), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('subscriptionId'), parameters('resourceGroupName')), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-RG-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.scope.value, reference(subscriptionResourceId(parameters('subscriptionId'), 'Microsoft.Resources/deployments', format('{0}-RoleDefinition-Sub-Module', uniqueString(deployment().name, parameters('location')))), '2020-10-01').outputs.scope.value))]",
+      "metadata": {
+        "description": "The scope this Role Definition applies to"
+      }
+    }
+  }
+}
